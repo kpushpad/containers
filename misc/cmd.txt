@@ -1,0 +1,19 @@
+http://blog.scottlowe.org/2013/11/25/a-brief-introduction-to-linux-containers-with-lxc/
+http://blog.scottlowe.org/2013/11/27/linux-containers-via-lxc-and-libvirt/
+
+lxc-start -d -n my-container
+lxc-console -n my-container 
+=> username => ubuntu 
+
+location => /home/cisco/.local/share/lxc  [change rootfs if you want]
+
+lxc tool put container file into => /var/lib/lxc 
+
+libvirt =>
+
+sudo virsh -c lxc://  define my-container.xml
+sudo virsh -c lxc://  start mycont
+sudo virsh -c lxc://  destroy mycont
+http://libvirt.org/drvlxc.html
+
+

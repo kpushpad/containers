@@ -1,0 +1,108 @@
+
+
+steps from => https://linuxcontainers.org/lxc/getting-started/
+
+Libvert container => 
+
+https://www.berrange.com/posts/2011/09/27/getting-started-with-lxc-using-libvirt/
+http://rabexc.org/posts/how-to-get-started-with-libvirt-on
+
+1. sudo apt-get install lxc
+
+2. put "kpushpad veth lxcbr0 10" /etc/lxc/lxc-usernet 
+
+kpushpad@ubuntu:~$ cat /etc/lxc/lxc-usernet
+# USERNAME TYPE BRIDGE COUNT
+kpushpad veth lxcbr0 10
+kpushpad@ubuntu:~$ 
+
+3.  
+  mkdir ~/.config/lxc
+  cp /etc/lxc/default.conf  ~/.config/lxc/default.conf 
+
+kpushpad@ubuntu:~$ cat   ~/.config/lxc/default.conf
+lxc.network.type = veth
+lxc.network.link = lxcbr0
+lxc.network.flags = up
+lxc.network.hwaddr = 00:16:3e:xx:xx:xx
+lxc.id_map = u 0 100000 65536
+lxc.id_map = g 0 100000 65536
+kpushpad@ubuntu:~$ 
+
+4 lxc-create -t download -n mycont <downnlof if you don't have >
+
+5. sudo lxc-start -n mycont  
+
+
+5.  sudo lxc-attach -n mycont 
+root@mycont:/# 
+root@mycont:/# 
+ 
+
+6. sudo lxc-stop -n mycont
+
+
+#########################LIB VIRT###########################################
+
+1. apt-get install libvirt-bin virtinst
+
+
+
+kpushpad@ubuntu:~/MyProject/containers$ ls -l mycont.xml 
+-rw-r--r-- 1 kpushpad kpushpad 592 Sep 25 00:49 mycont.xml
+kpushpad@ubuntu:~/MyProject/containers$ 
+
+
+kpushpad@ubuntu:~/MyProject/containers$ sudo virsh -e X -c lxc:///
+Welcome to virsh, the virtualization interactive terminal.
+
+Type:  'help' for help with commands
+       'quit' to quit
+
+virsh # define /home/kpushpad/MyProject/containers/mycont.xml 
+Domain mycont defined from /home/kpushpad/MyProject/containers/mycont.xml
+
+virsh # start mycont 
+Domain mycont started
+
+virsh # 
+
+virsh # start mycont 
+Domain mycont started
+
+virsh # destroy mycont 
+Domain mycont destroyed
+
+virsh # list
+ Id    Name                           State
+----------------------------------------------------
+
+virsh # start mycont 
+Domain mycont started
+
+virsh # list
+ Id    Name                           State
+----------------------------------------------------
+ 13771 mycont                         running
+
+virsh # 
+
+virsh # console mycont 
+Connected to domain mycont
+Escape character is X
+
+
+Ubuntu 14.04.5 LTS mycont tty1
+
+mycont login: root
+ 
+
+==> read full xmloutput , it has lot of other info
+
+virsh # list
+ Id    Name                           State
+----------------------------------------------------
+ 32622 mycont                         running
+
+virsh # dumpxml mycont
+

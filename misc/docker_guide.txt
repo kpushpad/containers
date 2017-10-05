@@ -1,0 +1,240 @@
+https://docs.docker.com/engine/installation/linux/ubuntulinux/
+
+uname -r 
+sudo apt-get update
+
+#################Start =>
+1. sudo apt-get install apt-transport-https ca-certificates
+
+2. sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+
+3. 
+root@ubuntu:/home/kpushpad# cat  /etc/apt/sources.list.d/docker.list
+deb https://apt.dockerproject.org/repo ubuntu-xenial main
+root@ubuntu:/home/kpushpad# 
+ 
+4. sudo apt-get update
+
+5.  sudo apt-get purge lxc-docker
+
+6. apt-cache policy docker-engine
+
+7. sudo apt-get install linux-image-extra-$(uname -r) linux-image-extra-virtual 
+
+8. reboot 
+
+9. sudo apt-get update  
+   sudo apt-get install docker-engine
+
+dockers commands => 
+
+####### please go throug below guide once #########
+command refrence => https://docker.github.io/engine/reference/commandline/
+
+=>  when we run docker , it create/forks rootfs that you can change/modify 
+   using 'diff' command you can take the diff and using 'commit' command 
+   you can commit which will make you anthore copy of rooftfs + changes stuff 
+
+=> https://www.youtube.com/watch?v=Q5POuMHxW-0
+
+=> start daemon 
+   sudo service docker start
+
+=> download hello program only for testing 
+
+   sudo docker run hello-world
+
+=> download ubuntu rootfs 
+
+   sudo docker run -i -t  ubuntu:14.04 /bin/bash 
+
+   <<< Every time you run "docker run" cmd , it will create new docker instance and 
+       if you do exist , it will not be removed . you need to manually stop & rm 
+       all docker instances/containers yourself
+    
+       see into this file => stop_rm_all_docker_inst
+   >>>>>>>>
+
+
+####### Get all running/stop docker instance 
+
+sudo docker -a -q
+
+################# Stop and rm all docker instance 
+
+sudo docker stop/rm <instance_id> 
+
+=> list local images 
+
+     sudo docker image
+
+=> diff and commit 
+sudo docker diff cb7650ad28bf
+
+=======> commit 
+
+  
+  syntax =>  sudo docker commmit fc3dc4d5cd05 [<image_name>:<version>]
+  
+ example =>  
+sudo docker commit   d40445501eec  
+<<<<<<<<<<<above only commit to existing image, means it doesn't create new image>>>> >
+ 
+sudo docker commit   d40445501eec  python_wget:1.0
+<<<<<<<<<<<It create new images python_wget:1.0 >>>> >
+sudo docker commit   d40445501eec  ubuntu:15.10
+
+=> delete it 
+sudo docker rmi edfb68980619
+
+=> making container listen on some port 
+   but make sure service is listening on port 8080 on docker instance
+
+ sudo docker run -p 8080 -i -t ubuntu /bin/bash
+ sudo docker ps
+
+Example => 
+
+cisco@ubuntu:~$ sudo docker ps
+[sudo] password for cisco: 
+CONTAINER ID        IMAGE               COMMAND             CREATED              STATUS              PORTS                     NAMES
+543fff776243        ubuntu              "/bin/bash"         About a minute ago   Up About a minute   0.0.0.0:32768->8080/tcp   nauseous_bhaskara
+cisco@ubuntu:~$ 
+
+ 
+  example => curl http://localhost:32768/ 
+
+=> Using docker file 
+
+1. Create docker file 
+
+cisco@ubuntu:~/containers$ cat /home/cisco/containers/docker/Dockerfile 
+#Kamal Kumar Pushpad 
+
+FROM ubuntu:14.04
+
+RUN apt-get install wget
+
+#CMD ["/usr/sbin/nginx", "-D", "FOREGROUND"]
+cisco@ubuntu:~/containers$ 
+
+
+2. build docker image from docker file
+
+ sudo docker build -f  /home/cisco/containers/docker/Dockerfile .
+
+################# List all the docker images 
+
+3. kpushpad@ubuntu:~$ sudo docker images 
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+ubuntu              14.04               f2d8ce9fa988        6 days ago          187.9 MB
+hello-world         latest              c54a2cc56cbb        3 months ago        1.848 kB
+kpushpad@ubuntu:~$ 
+
+##################### List all containerts (runnuing docker instance)
+
+kpushpad@ubuntu:~$ sudo docker  ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+03030299049d        f2d8ce9fa988        "/bin/bash"         6 seconds ago       Up 5 seconds                            pensive_hoover
+kpushpad@ubuntu:~$ 
+
+4.  sudo docker run -i -t f2d8ce9fa988  [/bin/bash]
+
+
+5. Taking diff 
+
+=>kpushpad@ubuntu:~$ sudo docker run -i -t f2d8ce9fa988
+root@5a4ac7e109e4:/# 
+
+
+########another window to get container ID#################
+
+=>  kpushpad@ubuntu:~$ sudo docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+5a4ac7e109e4        f2d8ce9fa988        "/bin/bash"         13 seconds ago      Up 12 seconds                           goofy_golick
+kpushpad@ubuntu:~$ 
+
+########### there will be no diff as we havn't done anything###########
+kpushpad@ubuntu:~$ sudo docker diff 5a4ac7e109e4
+kpushpad@ubuntu:~$ sudo docker diff 5a4ac7e109e4
+kpushpad@ubuntu:~$ 
+
+################# install some stuff in container now and take diff#######################
+
+root@5a4ac7e109e4:/# apt-get install wget
+..
+..
+root@5a4ac7e109e4:/# apt-get install wget
+..
+..
+
+antoher window take diff =>
+ 
+kpushpad@ubuntu:~$ sudo docker diff 5a4ac7e109e4 
+C /.wh..wh.plnk
+A /.wh..wh.plnk/101.157528
+A /.wh..wh.plnk/362.157461
+C /etc
+A /etc/ca-certificates
+A /etc/ca-certificates/update.d
+A /etc/ca-certificates.conf
+C /etc/ld.so.cache
+A /etc/ssl
+A /etc/ssl/certs
+...
+...
+..
+A /var/log/apt/term.log
+C /var/log/dpkg.log
+kpushpad@ubuntu:~$ 
+
+####### Docker images/diff are stored at below pages
+
+/* every time you run ner container (docker instance) , it will create new entries 
+   in /var/lib/docker/aufs/diff dir 
+*/
+root@ubuntu:/var/lib/docker/aufs/diff#ls 
+
+#################### we need to commit if we want new installed stuff to persiste ###########
+
+kpushpad@ubuntu:~$ sudo docker commit  5a4ac7e109e4 
+sha256:e4e1e76ed0bffe40450f386d1a77bfe734e89938dca23c45d4f8402fbc921bb9
+kpushpad@ubuntu:~$ 
+
+########## confirm if we have new image (first entry)####################
+kpushpad@ubuntu:~$ sudo docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+<none>              <none>              e4e1e76ed0bf        3 minutes ago       226.4 MB
+ubuntu              14.04               f2d8ce9fa988        7 days ago          187.9 MB
+hello-world         latest              c54a2cc56cbb        3 months ago        1.848 kB
+kpushpad@ubuntu:~$ 
+
+
+################################ delete committed stuff (images) permanently###############
+
+
+kpushpad@ubuntu:~$ sudo docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED              SIZE
+<none>              <none>              0392a9807794        5 seconds ago        226.4 MB
+<none>              <none>              08a02ce69d02        About a minute ago   226.4 MB
+<none>              <none>              e4e1e76ed0bf        6 minutes ago        226.4 MB
+ubuntu              14.04               f2d8ce9fa988        7 days ago           187.9 MB
+hello-world         latest              c54a2cc56cbb        3 months ago         1.848 kB
+
+kpushpad@ubuntu:~$ sudo docker rmi 08a02ce69d02
+
+Deleted: sha256:08a02ce69d0283094bb36c3d21238deef1836bd293397a520422b538f8bb8833
+
+kpushpad@ubuntu:~$ sudo docker rmi 0392a9807794
+
+Deleted: sha256:0392a9807794419f015dcf213a57a502b749dc45e8b4c230fed51e2ef8bf4ded
+
+Deleted: sha256:0b116197de2bedcd6f6ffe8839712cf20585526b0f9afc0820e0132f4fff50e7
+
+kpushpad@ubuntu:~$ sudo docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+<none>              <none>              e4e1e76ed0bf        7 minutes ago       226.4 MB
+ubuntu              14.04               f2d8ce9fa988        7 days ago          187.9 MB
+hello-world         latest              c54a2cc56cbb        3 months ago        1.848 kB
+kpushpad@ubuntu:~$ 
+

@@ -1,0 +1,52 @@
+
+
+
+"mycont" containers cgroup =>
+
+root@ubuntu:/sys/fs/cgroup/cpu/lxc/mycont# ls
+cgroup.clone_children  cpuacct.stat   cpuacct.usage_percpu  cpu.cfs_quota_us  cpu.stat           tasks
+cgroup.procs           cpuacct.usage  cpu.cfs_period_us     cpu.shares        notify_on_release
+root@ubuntu:/sys/fs/cgroup/cpu/lxc/mycont# 
+
+rootfs location =>
+
+root@ubuntu:/var/lib/lxc# ls
+mycont
+root@ubuntu:/var/lib/lxc# cd mycont/
+root@ubuntu:/var/lib/lxc/mycont# ls
+config  rootfs
+root@ubuntu:/var/lib/lxc/mycont# 
+
+####### 
+1. get pid of running container using "ps -ef | grep libvirt_lxc"
+
+2. then pstree -p 32622 (shows all running procs in container)
+
+pushpad@ubuntu:~$ pstree -p 32622
+libvirt_lxc(32622)───init(32636)─┬─cron(34218)
+                                 ├─dhclient(34135)
+                                 ├─getty(34853)
+                                 ├─getty(34855)
+                                 ├─getty(34857)
+                                 ├─login(34250)───bash(34279)───ping(34560)
+                                 ├─rsyslogd(34097)─┬─{in:imklog}(34100)
+                                 │                 ├─{in:imuxsock}(34099)
+                                 │                 └─{rs:main Q:Reg}(34101)
+                                 ├─systemd-udevd(34044)
+                                 ├─upstart-file-br(34095)
+                                 ├─upstart-socket-(32936)
+                                 └─upstart-udev-br(34036)
+
+3.  see name space of particular process ( i am seeing init proc of our containers)
+
+root@ubuntu:/proc/32636/task/32636/ns# ls -l
+total 0
+lrwxrwxrwx 1 root root 0 Sep 30 02:06 cgroup -> cgroup:[4026531835]
+lrwxrwxrwx 1 root root 0 Sep 30 02:06 ipc -> ipc:[4026532496]
+lrwxrwxrwx 1 root root 0 Sep 30 02:06 mnt -> mnt:[4026532494]
+lrwxrwxrwx 1 root root 0 Sep 30 02:06 net -> net:[4026532499]
+lrwxrwxrwx 1 root root 0 Sep 30 02:06 pid -> pid:[4026532497]
+lrwxrwxrwx 1 root root 0 Sep 30 02:06 user -> user:[4026531837]
+lrwxrwxrwx 1 root root 0 Sep 30 02:06 uts -> uts:[4026532495]
+root@ubuntu:/proc/32636/task/32636/ns# 
+
